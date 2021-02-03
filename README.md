@@ -8,7 +8,9 @@ HSVDetection is purely meant for detection. Given a window name, needle image an
 
 ##### cascadeHSVAgent
 This program is a mining agent / bot for OSRS to power mine Iron Ores. It has 4 different states; INITIALIZING, SEARCHING, MINING, and DROPPING. The agent will find the closest iron ore deposite using pythagorean distance, mine it, and keep mining until a full inventory is reached. When a full inventory is reached, the agent will drop the whole inventory and switch to searching state and start all over. 
+
 For this project I've used both HSV filtering and cascade classifier together, but this is far from necessary as I could've setted for one of them. But this was mostly to experiment with it. Training a good cascade classifier would've needed a lot more data than I've gathered in this project, which also is why this agent is acting extremely poorly in new locations. But it is working quite well in SE of Varrock. 
+
 Notice that this agent / bot is no way near perfect. This project has been done for educational purposes only, and will most likely get your account banned if you use it. 
 
 ##### How to train more data
