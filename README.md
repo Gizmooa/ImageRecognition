@@ -8,7 +8,7 @@ HSVDetection is purely meant for detection. Given a window name, needle image an
 
 ##### cascadeHSVAgent
 This program will use multiple positive and negative sample images, to build a cascade classifier model to detect iron ores and automatically mine the nearest one. In the last part of this readme I'll provide how to train more data, as the amount of data for this project is lacking quite a bit. 
-For this problem I used both HSV filtering and cascade classifier together, but this is not necessary if one were to make more and better samples. But it was also an experiment to see if the amount of frames would decrease drastically. In the future I will maybe implement a dropping feature. This can be done by having a needle image of a full inventory, and look if that image is in the screenshot. (Or looking for the "Not enough inventory" tooltip)
+For this problem I used both HSV filtering and cascade classifier together, but this is not necessary if one were to make more and better samples. But it was also an experiment to see if the amount of frames would decrease drastically. In the future I will maybe implement a dropping feature. This can be done by having a needle image of a full inventory, and look if that image is in the screenshot. (Or looking for the "Not enough space in inventory" tooltip)
 
 ##### How to train more data
 1) Create neg.txt
