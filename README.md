@@ -1,7 +1,7 @@
 # ImageRecognition in OSRS
 
 ### About the project
-First of all, this is a beginner project and the first time I have worked with computer vision. The foundation of the project is based on guides from "Learn Code By Gaming" at YouTube, and has been very helpful. In this project you'll find two folders; HSVDetection and cascadeHSVAgent. 
+First of all, this is a beginner project and the first time I have worked with computer vision. The foundation of the project is based on guides from "Learn Code By Gaming" on YouTube, and has been very helpful. In this project you'll find two folders; HSVDetection and cascadeHSVAgent. 
 
 ##### HSVDetection
 HSVDetection is purely meant for detection. Given a window name, needle image and a HSVFilter, it will draw rectangles on top of every object with a confidentiality of more than 50%. (In this case it will draw rectangles on every Copper Ore in OSRS)
