@@ -4,12 +4,12 @@
 First of all, this is a beginner project and the first time I have worked with computer vision. The foundation of the project is based on guides from "Learn Code By Gaming" on YouTube, and has been very helpful. In this project you'll find two folders; HSVDetection and cascadeHSVAgent. 
 
 ##### HSVDetection
-HSVDetection is purely meant for detection. Given a window name, needle image and a HSVFilter, it will draw rectangles on top of every object with a confidentiality of more than 50%. (In this case it will draw rectangles on every Copper Ore in OSRS)
+HSVDetection is purely meant for detection. Given a window name, needle image and a HSVFilter, it will draw rectangles on top of every object with a confidentiality score higher than 50%. (Running this program will draw rectangles on Copper Ores)
 
 ##### cascadeHSVAgent
-This program will use multiple positive and negative sample images, to build a cascade classifier model to detect iron ores and automatically mine the nearest one. In the last part of this readme I'll provide how to train more data, as the amount of data for this project is lacking quite a bit. 
-For this problem I used both HSV filtering and cascade classifier together, but this is not necessary if one were to make more and better samples. But it was also an experiment to see if the amount of frames would decrease drastically. In the future I will maybe implement a dropping feature. This can be done by having a needle image of a full inventory, and look if that image is in the screenshot. (Or looking for the "Not enough space in inventory" tooltip)
-Notice that this bot/agent is no way near perfect, and will do a lot of mistakes. This project has been done for educational purposes only, and will most likely get your account banned if you use it. 
+This program is a mining agent / bot for OSRS to power mine Iron Ores. It has 4 different states; INITIALIZING, SEARCHING, MINING, and DROPPING. The agent will find the closest iron ore deposite using pythagorean distance, mine it, and keep mining until a full inventory is reached. When a full inventory is reached, the agent will drop the whole inventory and switch to searching state and start all over. 
+For this project I've used both HSV filtering and cascade classifier together, but this is far from necessary as I could've setted for one of them. But this was mostly to experiment with it. Training a good cascade classifier would've needed a lot more data than I've gathered in this project, which also is why this agent is acting extremely poorly in new locations. But it is working quite well in SE of Varrock. 
+Notice that this agent / bot is no way near perfect. This project has been done for educational purposes only, and will most likely get your account banned if you use it. 
 
 ##### How to train more data
 1) Create neg.txt
