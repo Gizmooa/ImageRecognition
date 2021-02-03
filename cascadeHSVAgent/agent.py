@@ -1,9 +1,10 @@
 import cv2 as cv
 import pyautogui
+import numpy as np
 from time import sleep, time
 from threading import Thread, Lock
 from math import sqrt
-from random import uniform
+from random import uniform, randint
 from state import State
 
 class IronAgent:
@@ -22,7 +23,8 @@ class IronAgent:
     windOffset = (0,0)
     windowW = 0
     windowH = 0
-
+    fullInvPic = None
+    screenshot = None
 
     def __init__(self, offSet, winSize):
         self.lock = Lock()
@@ -33,6 +35,8 @@ class IronAgent:
 
         self.state = State.INITIALIZING
         self.timestamp = time()
+
+        self.fullInvPic = cv.imread('fullInv.jpg', cv.IMREAD_UNCHANGED)
 
     def targetsOrderedByDist(self, targets):
         # https://stackoverflow.com/a/30636138/4655368
@@ -60,9 +64,47 @@ class IronAgent:
 
             # We could start by moving the mouse to the location and then click, 
             # but this is not necessary as bluestack does not (should not) track mousemovement
+            #pyautogui.moveTo(screenX,screenY)
+
             pyautogui.click(x=screenX, y=screenY)
         return True
 
+
+    def dropInventory(self):
+        # First item is located at (750,255)
+        # You iterate to a new item to every row nor column by adding 45 pixels
+        NUM_ROW_ITEMS = 7 # 0 "indexed"
+        NUM_COL_ITEMS = 4 
+        currX = 750
+        currY = 260
+        for i in range(NUM_ROW_ITEMS):
+            for j in range(NUM_COL_ITEMS):
+                if (i % 2 == 0):
+                    screenX, screenY = self.getScreenPositions((currX, currY))
+                    pyautogui.moveTo(screenX,screenY)
+                    sleep(0.3)
+                    pyautogui.click()
+                    if (j < 3):
+                        currX = currX + 45
+                else:
+                    screenX, screenY = self.getScreenPositions((currX, currY))
+                    pyautogui.moveTo(screenX,screenY)
+                    sleep(0.3)
+                    pyautogui.click()
+                    if (j < 3):
+                        currX = currX - 45
+            currY = currY + 40
+        sleep(0.5)
+            
+    def isInventoryFull(self):
+        threshold = 0.9
+
+        cvMatch = cv.matchTemplate(self.screenshot, self.fullInvPic, cv.TM_CCOEFF_NORMED)
+        minVal, maxVal, minLoc, maxLoc = cv.minMaxLoc(cvMatch)
+        
+        if maxVal >= threshold:
+            return True
+        return False
 
     def getScreenPositions(self, pos):
         return (pos[0] + self.windOffset[0], pos[1] + self.windOffset[1])
@@ -70,6 +112,11 @@ class IronAgent:
     def updateTargets(self, targets):
         self.lock.acquire()
         self.targets = targets
+        self.lock.release()
+
+    def updateScreenshot(self, screenshot):
+        self.lock.acquire()
+        self.screenshot = screenshot
         self.lock.release()
 
     def start(self):
@@ -101,6 +148,17 @@ class IronAgent:
             
             elif self.state == State.MINING:
                 if time() > self.timestamp + self.MINING_SECONDS:
-                    self.lock.acquire()
-                    self.state = State.SEARCHING
-                    self.lock.release()
+                    if(self.isInventoryFull()):
+                        self.lock.acquire()
+                        self.state = State.DROPPING
+                        self.lock.release()
+                    else:
+                        self.lock.acquire()
+                        self.state = State.SEARCHING
+                        self.lock.release()
+
+            elif self.state == State.DROPPING:
+                self.dropInventory()
+                self.lock.acquire()
+                self.state = State.SEARCHING
+                self.lock.release()

@@ -49,14 +49,17 @@ while(True):
     if agent.state == State.INITIALIZING:
         targets = ironOreVision.returnCenterPos(detector.rectList)
         agent.updateTargets(targets)
+        agent.updateScreenshot(wincap.screenshot)
 
     elif agent.state == State.SEARCHING:
         targets = ironOreVision.returnCenterPos(detector.rectList)
         agent.updateTargets(targets)
+        agent.updateScreenshot(wincap.screenshot)
 
     elif agent.state == State.MINING:
         targets = ironOreVision.returnCenterPos(detector.rectList)
         agent.updateTargets(targets)
+        agent.updateScreenshot(wincap.screenshot)
 
     if SHOW_VISION:
         screen = ironOreVision.displayRectangles(wincap.screenshot, detector.rectList)
