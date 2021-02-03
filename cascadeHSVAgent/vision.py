@@ -5,6 +5,9 @@ from hsvfilter import HsvFilter
 class Vision:
     TRACKBAR_WINDOW = "Trackbar"
 
+    rectangleColor = (0, 255, 0)
+    rectangleType = cv.LINE_4
+    thickness = 1
 
     needle = None
     needleW = 0
@@ -13,10 +16,14 @@ class Vision:
 
     def __init__(self, needlePath, method=cv.TM_CCOEFF_NORMED):
         self.method = method
-        self.needle = cv.imread(needlePath, self.method)
 
-        self.needleW = self.needle.shape[1]
-        self.needleH = self.needle.shape[0]
+        # If we've been given a needle to search for
+        # read the image using cv and apply a processing method and save the shape
+        if needlePath:
+            self.needle = cv.imread(needlePath, self.method)
+
+            self.needleW = self.needle.shape[1]
+            self.needleH = self.needle.shape[0]
 
 
     '''
@@ -45,48 +52,41 @@ class Vision:
 
         return rectList
 
-
-    def return_cen_pos(self, rectList):
+    """ 
+    Given a list of rectangle object "(x, y, w, h)", the function will return
+    a list of tuples describing the center points for every rectangle
+    """
+    def returnCenterPos(self, rectList):
         points = []
-        # Loop over all the rectangles
         for (x, y, w, h) in rectList:
-            # Determine the center position
             centerX = x + int(w/2)
             centerY = y + int(h/2)
 
             points.append((centerX, centerY))
-
         return points
 
+    """
+    Given a haystack(image) and a list of rectangle objects "(x, y, w, h)"
+    the function will draw rectangles on the haystack image accordingly.
+    """
     def displayRectangles(self, haystack, rectList):
-        line_color = (0, 255, 0)
-        line_type = cv.LINE_8
-
         for (x,y,w,h) in rectList:
             top_left = (x, y)
             bottom_right = (x + w, y + h)
             # Draw the box
-            cv.rectangle(haystack, top_left, bottom_right, color=line_color, 
-                        lineType=line_type, thickness=1)
+            cv.rectangle(haystack, top_left, bottom_right, self.rectangleColor, 
+                        self.thickness, self.rectangleType)
         return haystack
 
-
-    def displayCrossHair(self, haystack, points):
-        marker_color = (255, 0, 255)
-        marker_type = cv.MARKER_CROSS
-        for (centerX, centerY) in points:
-            cv.drawMarker(haystack, (centerX, centerY), 
-                        color=marker_color, markerType=marker_type, 
-                        markerSize=20, thickness=1)
-        return haystack
-
-
-    def init_control_gui(self):
+    """
+    Function used to display the control GUI for HSV. This is used to find
+    HSV values which can be used to solve your specific problem.
+    """
+    def initControlGUI(self):
         cv.namedWindow(self.TRACKBAR_WINDOW, cv.WINDOW_NORMAL)
         cv.resizeWindow(self.TRACKBAR_WINDOW, 350, 700)
 
-        # required callback. we'll be using getTrackbarPos() to do lookups
-        # instead of using the callback.
+        # Callback function doing nothing
         def nothing(position):
             pass
 
@@ -109,42 +109,41 @@ class Vision:
         cv.createTrackbar('VAdd', self.TRACKBAR_WINDOW, 0, 255, nothing)
         cv.createTrackbar('VSub', self.TRACKBAR_WINDOW, 0, 255, nothing)
 
-    def get_hsv_filter_from_controls(self):
-        # Get current positions of all trackbars
-        hsv_filter = HsvFilter()
-        hsv_filter.hMin = cv.getTrackbarPos('HMin', self.TRACKBAR_WINDOW)
-        hsv_filter.sMin = cv.getTrackbarPos('SMin', self.TRACKBAR_WINDOW)
-        hsv_filter.vMin = cv.getTrackbarPos('VMin', self.TRACKBAR_WINDOW)
-        hsv_filter.hMax = cv.getTrackbarPos('HMax', self.TRACKBAR_WINDOW)
-        hsv_filter.sMax = cv.getTrackbarPos('SMax', self.TRACKBAR_WINDOW)
-        hsv_filter.vMax = cv.getTrackbarPos('VMax', self.TRACKBAR_WINDOW)
-        hsv_filter.sAdd = cv.getTrackbarPos('SAdd', self.TRACKBAR_WINDOW)
-        hsv_filter.sSub = cv.getTrackbarPos('SSub', self.TRACKBAR_WINDOW)
-        hsv_filter.vAdd = cv.getTrackbarPos('VAdd', self.TRACKBAR_WINDOW)
-        hsv_filter.vSub = cv.getTrackbarPos('VSub', self.TRACKBAR_WINDOW)
-        return hsv_filter
+    def getHSVPositionsFromTrackbar(self):
+        hsvFilter = HsvFilter()
+        hsvFilter.hMin = cv.getTrackbarPos('HMin', self.TRACKBAR_WINDOW)
+        hsvFilter.sMin = cv.getTrackbarPos('SMin', self.TRACKBAR_WINDOW)
+        hsvFilter.vMin = cv.getTrackbarPos('VMin', self.TRACKBAR_WINDOW)
+        hsvFilter.hMax = cv.getTrackbarPos('HMax', self.TRACKBAR_WINDOW)
+        hsvFilter.sMax = cv.getTrackbarPos('SMax', self.TRACKBAR_WINDOW)
+        hsvFilter.vMax = cv.getTrackbarPos('VMax', self.TRACKBAR_WINDOW)
+        hsvFilter.sAdd = cv.getTrackbarPos('SAdd', self.TRACKBAR_WINDOW)
+        hsvFilter.sSub = cv.getTrackbarPos('SSub', self.TRACKBAR_WINDOW)
+        hsvFilter.vAdd = cv.getTrackbarPos('VAdd', self.TRACKBAR_WINDOW)
+        hsvFilter.vSub = cv.getTrackbarPos('VSub', self.TRACKBAR_WINDOW)
+        return hsvFilter
 
     
-    def apply_hsv_filter(self, haystack, hsv_filter=None):
+    def applyHSVFilter(self, haystack, hsvFilter=None):
         # convert image to HSV from BGR
         hsv = cv.cvtColor(haystack, cv.COLOR_BGR2HSV)
 
         # if we haven't been given a defined filter, use the filter values from the GUI
-        if not hsv_filter:
-            hsv_filter = self.get_hsv_filter_from_controls()
+        if not hsvFilter:
+            hsvFilter = self.getHSVPositionsFromTrackbar()
 
         # add/subtract saturation and value
         h, s, v = cv.split(hsv)
-        s = self.shift_channel(s, hsv_filter.sAdd)
-        s = self.shift_channel(s, -hsv_filter.sSub)
-        v = self.shift_channel(v, hsv_filter.vAdd)
-        v = self.shift_channel(v, -hsv_filter.vSub)
+        s = self.shiftChannel(s, hsvFilter.sAdd)
+        s = self.shiftChannel(s, -hsvFilter.sSub)
+        v = self.shiftChannel(v, hsvFilter.vAdd)
+        v = self.shiftChannel(v, -hsvFilter.vSub)
         # Merge to a single image
         hsv = cv.merge([h, s, v])
 
         # Set minimum and maximum HSV values to display
-        lower = np.array([hsv_filter.hMin, hsv_filter.sMin, hsv_filter.vMin])
-        upper = np.array([hsv_filter.hMax, hsv_filter.sMax, hsv_filter.vMax])
+        lower = np.array([hsvFilter.hMin, hsvFilter.sMin, hsvFilter.vMin])
+        upper = np.array([hsvFilter.hMax, hsvFilter.sMax, hsvFilter.vMax])
         # Apply the thresholds
         mask = cv.inRange(hsv, lower, upper)
         result = cv.bitwise_and(hsv, hsv, mask=mask)
@@ -157,7 +156,7 @@ class Vision:
     # apply adjustments to an HSV channel
     # Makes sure when adding 10 to one with 255, it will not overflow
     # https://stackoverflow.com/questions/49697363/shifting-hsv-pixel-values-in-python-using-numpy
-    def shift_channel(self, c, amount):
+    def shiftChannel(self, c, amount):
         if amount > 0:
             lim = 255 - amount
             c[c >= lim] = 255
