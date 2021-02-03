@@ -1,10 +1,10 @@
-# ImageRecognition in OSRS
+# Using Image Recognition to bot in OSRS
 
 ### About the project
 First of all, this is a beginner project and the first time I have worked with computer vision. The foundation of the project is based on guides from "Learn Code By Gaming" on YouTube, and has been very helpful. In this project you'll find two folders; HSVDetection and cascadeHSVAgent. 
 
 ##### HSVDetection
-HSVDetection is purely meant for detection. Given a window name, needle image and a HSVFilter, it will draw rectangles on top of every object with a confidentiality score higher than 50%. (Running this program will draw rectangles on Copper Ores)
+This program will do image processing and object detection in real time on BlueStacks running OSRS. (This can easily be changed to other games, or applications) The image processing is done with a HSV filter, where we will use OpenCV to match a needle image on top of every screenshot. The program will then draw rectangles on every object with a confidentiality score higher than 50%. (This program will detect Copper Ores in OSRS)
 
 ##### cascadeHSVAgent
 This program is a mining agent / bot for OSRS to power mine Iron Ores. It has 4 different states; INITIALIZING, SEARCHING, MINING, and DROPPING. The agent will find the closest iron ore deposite using pythagorean distance, mine it, and keep mining until a full inventory is reached. When a full inventory is reached, the agent will drop the whole inventory and switch to searching state and start all over. 
